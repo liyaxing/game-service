@@ -25,7 +25,7 @@ This command will create a JAR file in the target/ directory.
 You can run the JAR file directly by specifying the necessary environment variables for the datasource configuration.
 
 ```sh
-java -jar game-service-0.0.1-SNAPSHOT.jar --spring.datasource.url=jdbc:mysql://localhost:13306/mydatabase --spring.datasource.username=myuser --spring.datasource.password=secret
+java -jar target/game-service-0.0.1-SNAPSHOT.jar --spring.datasource.url=jdbc:mysql://localhost:13306/mydatabase --spring.datasource.username=myuser --spring.datasource.password=secret
 ```
 
 Alternatively, set the environment variables and then run the JAR.
