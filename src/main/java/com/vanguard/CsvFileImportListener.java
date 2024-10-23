@@ -10,6 +10,7 @@ import com.vanguard.repository.GameSaleRepository;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -23,7 +24,8 @@ import java.util.concurrent.Executors;
 
 @Component
 public class CsvFileImportListener {
-    private static final int BATCH_SIZE = 1000;
+    @Value("${batch.size}")
+    private int batchSize;
     private static final int THREAD_COUNT = 10;
     private final CSVFileRepository csvFileRepository;
     private final GameSaleRepository gameSaleRepository;
@@ -58,7 +60,7 @@ public class CsvFileImportListener {
                     rows.add(gameSale);
                     ++totalRecords;
 
-                    if (rows.size() == BATCH_SIZE) {
+                    if (rows.size() == batchSize) {
                         var batch = new ArrayList<>(rows); // Create a new list for the batch
                         executorService.submit(() -> gameSaleRepository.saveAll(batch.stream().map(row -> toEntity(fileId, row)).toList()));
                         metadata = updateProgress(metadata, totalRecords, FileStatus.IN_PROGRESS);
@@ -69,12 +71,13 @@ public class CsvFileImportListener {
                     var finalBatch = new ArrayList<>(rows); // Create a new list for the final batch
                     executorService.submit(() -> gameSaleRepository.saveAll(finalBatch.stream().map(row -> toEntity(fileId, row)).toList()));
                 }
+
+                metadata = updateProgress(metadata, totalRecords, FileStatus.COMPLETED);
             } catch (IOException e) {
                 updateProgress(metadata, totalRecords, FileStatus.FAILED);
                 throw new FileIOException("Error processing csv file.");
             }
         }
-        updateProgress(metadata, totalRecords, FileStatus.COMPLETED);
     }
 
     private CSVFileEntity updateProgress(CSVFileEntity entity, int processedRecords, FileStatus fileStatus) {

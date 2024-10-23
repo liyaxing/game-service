@@ -43,7 +43,7 @@ public class GameController {
         return new ResponseEntity<>(dto, headers, HttpStatus.CREATED);
     }
 
-    @GetMapping("/file/{fileId}")
+    @GetMapping("/files/{fileId}")
     public ResponseEntity<CSVFileDto> getFileStatus(@PathVariable Long fileId) {
         var dto = gameService.getFileStatus(fileId);
         return new ResponseEntity<>(dto, HttpStatus.OK);
